@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series Online</title>
+    <link rel="icon" href="2.png" type="image/x-icon">
+    <style>
+        body {
+            background-color: #1a1a2e; /* Azul oscuro */
+            color: #fff; /* Texto en blanco */
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #61dafb; /* Color azul claro */
+        }
+
+        .folder-header {
+            cursor: pointer;
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        .folder-header:hover {
+            background-color: #555;
+        }
+
+        .video-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .video-card {
+            width: 20%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin: 10px;
+            background-color: #292a3a; /* Color de fondo de los cuadros de video */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: scale(1.05);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 60%;
+            object-fit: cover;
+        }
+
+        .video-title {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .hidden-video {
+            display: none;
+        }
+
+        #search-bar {
+            margin-top: 20px;
+            padding: 10px;
+            width: 50%;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #video-list {
+            display: none;
+            padding: 20px;
+        }
+
+        #video-list video {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Series Online</h1>
+
+    <!-- Barra de búsqueda -->
+    <input type="text" id="search-bar" placeholder="Buscar videos">
+
+    <!-- Videos recién agregados -->
+    <div id="video-container"></div>
+
+    <!-- Lista de videos -->
+    <div id="video-list"></div>
+
+    <script>
+        // Simulación de datos de videos recién agregados
+        const videoData = [
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 6', url: 'Percy-JacksonCapitulo 6.mkv', thumbnail: 'capitulo6.png' },
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 5', url: 'Percy-JacksonCapitulo 5.mkv', thumbnail: 'capitulo5.png' },
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 4', url: 'Percy-JacksonCapitulo 4.mkv', thumbnail: 'capitulo4.png' },
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 3', url: 'Percy-JacksonCapitulo 3.mkv', thumbnail: 'capitulo3.png' },
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 2', url: 'Percy-JacksonCapitulo 2.mkv', thumbnail: 'capitulo2.png' },
+            { folder: 'Percy Jackson', title: 'Percy Jackson Capitulo 1', url: 'Percy-JacksonCapitulo 1.mkv', thumbnail: 'capitulo1.png' },
+            { folder: 'Echo', title: 'Echo capitulo 5', url: 'video5.mp4', thumbnail: 'echocapitulo5.png' },
+            { folder: 'Echo', title: 'Echo Capitulo 4', url: 'video4.mp4', thumbnail: 'echocapitulo4.png' },
+            { folder: 'Echo', title: 'Echo Capitulo 3', url: 'video3.mp4', thumbnail: 'echocapitulo3.png' },
+            { folder: 'Echo', title: 'Echo Capitulo 2', url: 'video2.mp4', thumbnail: 'echocapitulo2.png' },
+            { folder: 'Echo', title: 'Echo Capitulo 1', url: 'video1.mp4', thumbnail: 'echocapitulo1.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 6', url: 'video6.mp4', thumbnail: 'secretinasioncapitulo6.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 5', url: 'video5.mp4', thumbnail: 'secretinasioncapitulo5.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 4', url: 'video4.mp4', thumbnail: 'secretinasioncapitulo4.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 3', url: 'video3.mp4', thumbnail: 'secretinasioncapitulo3.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 2', url: 'video2.mp4', thumbnail: 'secretinasioncapitulo2.png' },
+            { folder: 'Secret Invasion', title: 'Secret Invasion capitulo 1', url: 'video1.mp4', thumbnail: 'secretinasioncapitulo1.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 6', url: 'video6.mp4', thumbnail: 'obiwancapitulo6.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 5', url: 'video5.mp4', thumbnail: 'obiwancapitulo5.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 4', url: 'video4.mp4', thumbnail: 'obiwancapitulo4.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 3', url: 'video3.mp4', thumbnail: 'obiwancapitulo3.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 2', url: 'video2.mp4', thumbnail: 'obiwancapitulo2.png' },
+            { folder: 'Obi-Wan Kenobi', title: 'Obi-Wan capitulo 1', url: 'video1.mp4', thumbnail: 'obiwancapitulo1.png' },
+
+            // ... Agregar más datos de videos
+        ];
+
+        function loadRecentVideos() {
+            const videoContainer = document.getElementById('video-container');
+            videoContainer.innerHTML = '';
+
+            const uniqueFolders = [...new Set(videoData.map(video => video.folder))];
+
+            uniqueFolders.forEach(folder => {
+                const folderHeader = document.createElement('div');
+                folderHeader.classList.add('folder-header');
+                folderHeader.innerText = folder;
+                folderHeader.addEventListener('click', () => toggleFolder(folder));
+                videoContainer.appendChild(folderHeader);
+
+                const folderVideos = videoData.filter(video => video.folder === folder);
+                folderVideos.forEach((video, index) => {
+                    const videoCard = document.createElement('div');
+                    videoCard.classList.add('video-card', 'hidden-video');
+                    videoCard.innerHTML = `<img class="video-thumbnail" src="${video.thumbnail}" alt="Thumbnail">
+                                           <p class="video-title">${video.title}</p>`;
+                    videoCard.addEventListener('click', () => showVideo(index));
+                    videoContainer.appendChild(videoCard);
+                });
+            });
+        }
+
+        function toggleFolder(folder) {
+            const folderVideos = document.querySelectorAll(`.video-card.${folder}`);
+            folderVideos.forEach(video => video.classList.toggle('hidden-video'));
+        }
+
+        function showVideo(index) {
+            const videoList = document.getElementById('video-list');
+            videoList.innerHTML = `<video controls>
+                                    <source src="${videoData[index].url}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                  </video>`;
+            videoList.style.display = 'block';
+            const videoElement = videoList.querySelector('video');
+            const skipButton = document.createElement('button');
+            skipButton.innerText = 'Adelantar 10s';
+            skipButton.addEventListener('click', () => {
+                videoElement.currentTime += 10;
+            });
+
+            videoList.appendChild(skipButton);
+            videoList.style.display = 'block';
+        }
+
+        function filterVideos() {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+            const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
+
+            const videoContainer = document.getElementById('video-container');
+            videoContainer.innerHTML = '';
+
+            filteredVideos.forEach((video, index) => {
+                const videoCard = document.createElement('div');
+                videoCard.classList.add('video-card');
+                videoCard.innerHTML = `<img class="video-thumbnail" src="${video.thumbnail}" alt="Thumbnail">
+                                       <p class="video-title">${video.title}</p>`;
+                videoCard.addEventListener('click', () => showVideo(index));
+                videoContainer.appendChild(videoCard);
+            });
+        }
+
+        window.onload = loadRecentVideos;
+
+        document.getElementById('search-bar').addEventListener('input', filterVideos);
+    </script>
+</body>
+</html>
